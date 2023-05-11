@@ -18,9 +18,9 @@
 #define MAX_MSG_LEN 1024
 #define FILE_SIZE 104857600
 #define CHUNK_SIZE 15000
-#define UDS_D_PATH "/tmp/uds_dgram_socket6"
+#define UDS_D_PATH "/tmp/uds_dgram_socket3"
 #define UDS_S_PATH "/tmp/uds_stream_socket3"
-#define PIPE_PATH "/tmp/pipe1"
+#define PIPE_PATH "/tmp/pipe"
 
 void gen_file()
 {
@@ -154,7 +154,7 @@ void tcp_ipv4_server(int port, int flag_q)
     }
     clock_t end_time = clock();
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("IPv4 tcp,%f\n", elapsed_time * 1000);
+    printf("ipv4_tcp,%f\n", elapsed_time * 1000);
 
     char *filename = "tcp_ipv4";
 
@@ -168,7 +168,7 @@ void tcp_ipv4_server(int port, int flag_q)
 
 void tcp_ipv4_client(const char *ip, int port)
 {
-    printf("tcp_ipv4_client - 1\n");
+    // printf("tcp_ipv4_client\n");
     fflush(stdout);
     int sock_tcp_ipv4 = socket(AF_INET, SOCK_STREAM, 0);
     if (sock_tcp_ipv4 < 0)
@@ -176,7 +176,7 @@ void tcp_ipv4_client(const char *ip, int port)
         perror("socket");
         exit(1);
     }
-    printf("tcp_ipv4_client with port %d\n", port);
+    // printf("tcp_ipv4_client with port %d\n", port);
     struct sockaddr_in serv_addr_4;
     memset(&serv_addr_4, 0, sizeof(serv_addr_4));
     serv_addr_4.sin_family = AF_INET;
@@ -189,14 +189,14 @@ void tcp_ipv4_client(const char *ip, int port)
         exit(1);
     }
 
-    printf("Connected to server in tcp_ipv4 at %s: %d\n", ip, port);
+    // printf("Connected to server in tcp_ipv4 at %s: %d\n", ip, port);
 
     int read;
     char buffer[CHUNK_SIZE];
     FILE *f = fopen("100MB.bin", "rb");
     char *filename = "100MB.bin";
-    checksum(filename);
-    printf("open a file\n");
+    // checksum(filename);
+    // printf("open a file\n");
 
     while ((read = fread(buffer, 1, CHUNK_SIZE, f)) > 0)
     {
@@ -207,7 +207,7 @@ void tcp_ipv4_client(const char *ip, int port)
         }
         // printf("sent %d\n", read);
     }
-    printf("sent a file\n");
+    // printf("sent a file\n");
     fclose(f);
     close(sock_tcp_ipv4);
 }
@@ -270,7 +270,7 @@ void udp_ipv4_server(int port, int flag_q)
     clock_t end_time = clock();
 
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("IPv4 udp,%f\n", elapsed_time * 1000);
+    printf("ipv4_udp,%f\n", elapsed_time * 1000);
 
     char *filename = "udp_ipv4";
     if (flag_q)
@@ -296,14 +296,14 @@ void udp_ipv4_client(const char *ip, int port)
     serv_addr.sin_addr.s_addr = inet_addr(ip);
     serv_addr.sin_port = htons(port);
 
-    printf("Connected to server in udp_ipv4 at %s:%d\n", ip, port);
+    // printf("Connected to server in udp_ipv4 at %s:%d\n", ip, port);
 
     int read;
     char buffer[CHUNK_SIZE];
     FILE *f = fopen("100MB.bin", "rb");
     char *filename = "100MB.bin";
-    checksum(filename);
-    printf("Opened file '%s'\n", filename);
+    // checksum(filename);
+    // printf("Opened file '%s'\n", filename);
     int send;
 
     sleep(2);
@@ -316,7 +316,7 @@ void udp_ipv4_client(const char *ip, int port)
             exit(1);
         }
     }
-    printf("Sent file '%s'\n", filename);
+    // printf("Sent file '%s'\n", filename);
     fclose(f);
     close(sock_udp_ipv4);
 }
@@ -387,7 +387,7 @@ void tcp_ipv6_server(int port, int flag_q)
     clock_t end_time = clock();
 
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("IPv6 tcp,%f\n", elapsed_time * 1000);
+    printf("ipv6_tcp,%f\n", elapsed_time * 1000);
 
     char *filename = "tcp_ipv6";
     if (flag_q)
@@ -400,15 +400,15 @@ void tcp_ipv6_server(int port, int flag_q)
 
 void tcp_ipv6_client(const char *ip, int port)
 {
-    printf("tcp_ipv6_client - 1\n");
-    fflush(stdout);
+    // printf("tcp_ipv6_client - 1\n");
+    // fflush(stdout);
     int sock_tcp_ipv6 = socket(AF_INET6, SOCK_STREAM, 0);
     if (sock_tcp_ipv6 < 0)
     {
         perror("socket");
         exit(1);
     }
-    printf("tcp_ipv6_client with port %d\n", port);
+    // printf("tcp_ipv6_client with port %d\n", port);
     struct sockaddr_in6 serv_addr;
     memset(&serv_addr, 0, sizeof(serv_addr));
     serv_addr.sin6_family = AF_INET6;
@@ -421,14 +421,14 @@ void tcp_ipv6_client(const char *ip, int port)
         exit(1);
     }
 
-    printf("Connected to server in tcp_ipv6 at %s: %d\n", ip, port);
+    // printf("Connected to server in tcp_ipv6 at %s: %d\n", ip, port);
 
     int read;
     char buffer[CHUNK_SIZE];
     FILE *f = fopen("100MB.bin", "rb");
     char *filename = "100MB.bin";
-    checksum(filename);
-    printf("open a file\n");
+    // checksum(filename);
+    // printf("open a file\n");
 
     while ((read = fread(buffer, 1, CHUNK_SIZE, f)) > 0)
     {
@@ -439,7 +439,7 @@ void tcp_ipv6_client(const char *ip, int port)
         }
         // printf("sent %d\n", read);
     }
-    printf("sent a file\n");
+    // printf("sent a file\n");
     fclose(f);
     close(sock_tcp_ipv6);
 }
@@ -470,7 +470,7 @@ void udp_ipv6_server(int port, int flag_q)
     // printf("Client connected\n");
 
     char buf[CHUNK_SIZE];
-    int i = 6966;
+    int i = 80000;
     FILE *f = fopen("udp_ipv6", "wb");
     fclose(f);
     f = fopen("udp_ipv6", "ab");
@@ -480,20 +480,26 @@ void udp_ipv6_server(int port, int flag_q)
 
     while (i)
     {
-        while (receive = (recvfrom(sock_udp_ipv6, buf, (CHUNK_SIZE + 500), MSG_DONTWAIT, (struct sockaddr *)&cli_addr, &cli_addr_len)) <= 0)
+        while ((receive = recvfrom(sock_udp_ipv6, buf, (CHUNK_SIZE + 3000), MSG_DONTWAIT, (struct sockaddr *)&cli_addr, &cli_addr_len)) < 0)
         {
-            if (i == 6966)
+            if (i == 80000)
                 start_time = clock();
             else
                 break;
         }
-        fwrite(buf, 1, receive, f);
+        if (receive > 0)
+        {
+            // printf("receive = %d\n", receive);
+            fwrite(buf, receive, 1, f);
+            memset(buf, 0, CHUNK_SIZE);
+        }
         i--;
+        // printf("i = %d\n", i);
     }
     clock_t end_time = clock();
 
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("IPv6 udp,%f\n", elapsed_time * 1000);
+    printf("ipv6_udp,%f\n", elapsed_time * 1000);
 
     char *filename = "udp_ipv6";
     if (flag_q)
@@ -519,26 +525,27 @@ void udp_ipv6_client(const char *ip, int port)
     inet_pton(AF_INET6, ip, &serv_addr.sin6_addr);
     serv_addr.sin6_port = htons(port);
 
-    printf("Connected to server in udp_ipv6 at %s:%d\n", ip, port);
+    // printf("Connected to server in udp_ipv6 at %s:%d\n", ip, port);
 
     int read;
     char buffer[CHUNK_SIZE];
     FILE *f = fopen("100MB.bin", "rb");
     char *filename = "100MB.bin";
-    checksum(filename);
-    printf("Opened file '%s'\n", filename);
+    int send;
+    // checksum(filename);
+    // printf("Opened file '%s'\n", filename);
 
     sleep(2);
-    while ((read = fread(buffer, 1, CHUNK_SIZE, f)) > 0)
+    while ((read = fread(buffer, CHUNK_SIZE, 1, f)) > 0)
     {
         // sleep(0.1);
-        if (sendto(sock_udp_ipv6, buffer, read, 0, (const struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
+        if ((send = sendto(sock_udp_ipv6, buffer, CHUNK_SIZE, 0, (const struct sockaddr *)&serv_addr, sizeof(serv_addr))) < 0)
         {
             perror("sendto");
             exit(1);
         }
     }
-    printf("Sent file '%s'\n", filename);
+    // printf("Sent file '%s'\n", filename);
     fclose(f);
     close(sock_udp_ipv6);
 }
@@ -597,7 +604,7 @@ void uds_dgram_server(int flag_q)
     clock_t end_time = clock();
 
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("UDS datagram,%f\n", elapsed_time * 1000);
+    printf("uds_dgram,%f\n", elapsed_time * 1000);
 
     char *filename = "uds_dgram";
     if (flag_q)
@@ -623,14 +630,14 @@ void uds_dgram_client()
     serv_addr.sun_family = AF_UNIX;
     strncpy(serv_addr.sun_path, UDS_D_PATH, sizeof(serv_addr.sun_path) - 1);
 
-    printf("Connected to server in uds_dgram\n");
+    // printf("Connected to server in uds_dgram\n");
 
     int read;
     char buffer[CHUNK_SIZE];
     FILE *f = fopen("100MB.bin", "rb");
     char *filename = "100MB.bin";
-    checksum(filename);
-    printf("Opened file '%s'\n", filename);
+    // checksum(filename);
+    // printf("Opened file '%s'\n", filename);
     int i = 1;
 
     sleep(2);
@@ -643,7 +650,7 @@ void uds_dgram_client()
         }
         i++;
     }
-    printf("Sent file '%s'\n", filename);
+    // printf("Sent file '%s'\n", filename);
     fclose(f);
     close(sock_uds_dgram);
 }
@@ -717,7 +724,7 @@ void uds_stream_server(int flag_q)
     clock_t end_time = clock();
 
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("UDS stream,%f\n", elapsed_time * 1000);
+    printf("uds_stream,%f\n", elapsed_time * 1000);
 
     char *filename = "uds_stream";
     if (flag_q)
@@ -750,14 +757,14 @@ void uds_stream_client()
         exit(1);
     }
 
-    printf("Connected to server in uds_stream\n");
+    // printf("Connected to server in uds_stream\n");
 
     int read_bytes;
     char buffer[CHUNK_SIZE];
     FILE *f = fopen("100MB.bin", "rb");
     char *filename = "100MB.bin";
-    checksum(filename);
-    printf("Opened file '%s'\n", filename);
+    // checksum(filename);
+    // printf("Opened file '%s'\n", filename);
 
     sleep(2);
     while ((read_bytes = fread(buffer, 1, CHUNK_SIZE, f)) > 0)
@@ -774,7 +781,7 @@ void uds_stream_client()
             exit(1);
         }
     }
-    printf("Sent file '%s'\n", filename);
+    // printf("Sent file '%s'\n", filename);
     fclose(f);
     close(sock_uds_stream);
 }
@@ -817,7 +824,7 @@ void mmap_server(char *filename, int flag_q)
     clock_t end_time = clock();
 
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("MMAP,%f\n", elapsed_time * 1000);
+    printf("mmap,%f\n", elapsed_time * 1000);
     if (flag_q)
     {
         checksum("mmp.bin");
@@ -834,8 +841,8 @@ void mmap_server(char *filename, int flag_q)
 
 void mmap_client(const char *filename)
 {
-    printf("filename = %s\n", filename);
-    fflush(stdout);
+    // printf("filename = %s\n", filename);
+    // fflush(stdout);
 
     int fd = open("mmap", O_RDWR, S_IRUSR | S_IWUSR); // open file with read permissions
     if (fd == -1)
@@ -875,7 +882,7 @@ void mmap_client(const char *filename)
         perror("munmap");
         exit(1);
     }
-    checksum(filename);
+    // checksum(filename);
     close(fd);
 }
 
@@ -912,7 +919,7 @@ void pipe_filename_server(const char *filename, int flag_q)
     }
     clock_t end_time = clock();
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("MMAP,%f\n", elapsed_time * 1000);
+    printf("pipe,%f\n", elapsed_time * 1000);
     if (flag_q)
     {
         checksum("mmp.bin");
@@ -956,7 +963,7 @@ void pipe_filename_client(const char *filename)
     }
 
     // Close the named pipe and the file
-    checksum(filename);
+    // checksum(filename);
     close(pipe_fd);
     close(fd);
 }
@@ -996,7 +1003,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         exit(1);
     }
 
-    printf("Connected to server at %s:%d\n", ip, port);
+    // printf("Connected to server at %s:%d\n", ip, port);
 
     if (flag)
     {
@@ -1007,7 +1014,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         strcat(type_and_param, param);
         type_and_param[strlen(type_and_param)] = '\0';
 
-        printf("type_and_param = %s\n", type_and_param);
+        // printf("type_and_param = %s\n", type_and_param);
 
         sleep(1);
         int sen = send(sockfd, type_and_param, strlen(type_and_param), 0);
@@ -1023,7 +1030,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         if (strcmp(type_and_param, "ipv4 tcp") == 0)
         {
             close(sockfd);
-            printf("2 ipv4 tcp\n");
+            // printf("2 ipv4 tcp\n");
             free(type_and_param);
             tcp_ipv4_client(ip, (port + 1));
             return;
@@ -1032,7 +1039,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         else if (strcmp(type_and_param, "ipv4 udp") == 0)
         {
             close(sockfd);
-            printf("2 ipv4 udp\n");
+            // printf("2 ipv4 udp\n");
             free(type_and_param);
             udp_ipv4_client(ip, (port + 1));
             return;
@@ -1041,7 +1048,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         else if (strcmp(type_and_param, "ipv6 tcp") == 0)
         {
             close(sockfd);
-            printf("ipv6 tcp\n");
+            // printf("ipv6 tcp\n");
             free(type_and_param);
             tcp_ipv6_client(ip, (port + 1));
             return;
@@ -1049,7 +1056,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         else if (strcmp(type_and_param, "ipv6 udp") == 0)
         {
             close(sockfd);
-            printf("ipv6 udp\n");
+            // printf("ipv6 udp\n");
             free(type_and_param);
             udp_ipv6_client(ip, (port + 1));
             return;
@@ -1057,7 +1064,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         else if (strcmp(type_and_param, "uds dgram") == 0)
         {
             close(sockfd);
-            printf("uds dgram\n");
+            // printf("uds dgram\n");
             free(type_and_param);
             uds_dgram_client();
             return;
@@ -1065,7 +1072,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         else if (strcmp(type_and_param, "uds stream") == 0)
         {
             close(sockfd);
-            printf("uds stream\n");
+            // printf("uds stream\n");
             free(type_and_param);
             uds_stream_client();
             return;
@@ -1073,7 +1080,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         else if (strstr(type_and_param, "mmap") != NULL)
         {
             close(sockfd);
-            printf("mmap\n");
+            // printf("mmap\n");
             free(type_and_param);
             mmap_client(param);
             return;
@@ -1081,7 +1088,7 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         else if (strstr(type_and_param, "pipe") != NULL)
         {
             close(sockfd);
-            printf("pipe\n");
+            // printf("pipe\n");
             free(type_and_param);
             pipe_filename_client(param);
             return;
@@ -1129,7 +1136,6 @@ void run_client(char *ip, int port, int flag, const char *type, const char *para
         }
     }
 
-    // close(sockfd);
 }
 
 void run_server(int port, int flag_p, int flag_q)
