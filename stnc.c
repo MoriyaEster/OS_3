@@ -57,7 +57,7 @@ void gen_file()
     free(buffer);
 }
 
-void checksum(char *filename)
+void checksum(const char *filename)
 {
     FILE *f = fopen(filename, "rb");
     if (f == NULL)
@@ -747,124 +747,108 @@ void uds_stream_client()
 
 void mmap_server(char *filename)
 {
-    printf("in mmap_server\n");
-    int fd = open(filename, O_RDWR | O_CREAT | O_TRUNC, (mode_t)0600);
+    int fd = open(filename, O_RDWR | O_CREAT, 0666); // create file with read/write permissions
     if (fd == -1)
     {
-        perror("Error opening file");
+        perror("open");
         exit(1);
     }
 
-    if (lseek(fd, FILE_SIZE - 1, SEEK_SET) == -1)
+    // Set the file size
+    if (ftruncate(fd, FILE_SIZE) == -1)
     {
-        close(fd);
-        perror("Error calling lseek() to stretch the file");
+        perror("ftruncate");
         exit(1);
     }
 
-    if (write(fd, "", 1) == -1)
+    // Map the file into memory
+    void *addr = mmap(NULL, FILE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (addr == MAP_FAILED)
     {
-        close(fd);
-        perror("Error writing last byte of the file");
+        perror("mmap");
         exit(1);
     }
 
-    char *mapped_file = mmap(NULL, FILE_SIZE, PROT_WRITE, MAP_SHARED, fd, 0);
-    if (mapped_file == MAP_FAILED)
+    // Wait for the client to write data to the mapped memory
+    while (strcmp((char *)addr, "ACK") != 0)
     {
-        close(fd);
-        perror("Error mmapping the file");
-        exit(1);
+        sleep(1);
     }
 
-    close(fd);
+    // Write the data from the mapped memory to a new file
+    int new_fd = open("mmp.bin", O_WRONLY | O_CREAT, 0666); // create output file with write permissions
 
-    printf("Client connected\n");
-
-    int i = 500000;
-    int receive;
-    sleep(1);
     clock_t start_time = clock();
-
-    while (i)
+    if (new_fd == -1)
     {
-        receive = 0;
-        while (receive <= 0)
-        {
-            receive = *((int *)mapped_file);
-            if (i == 500000)
-                start_time = clock();
-        }
-        mapped_file += sizeof(int);
-        i--;
+        perror("open");
+        exit(1);
     }
-
+    if (write(new_fd, addr, FILE_SIZE) == -1)
+    {
+        perror("write");
+        exit(1);
+    }
     clock_t end_time = clock();
 
     double elapsed_time = (double)(end_time - start_time) / CLOCKS_PER_SEC;
-    printf("mmap, %f\n", elapsed_time * 1000);
+    printf("MMAP, %f\n", elapsed_time * 1000);
+    checksum ("mmp.bin");
 
-    checksum(filename);
-
-    munmap(mapped_file - FILE_SIZE, FILE_SIZE);
+    // Unmap the memory and close the files
+    if (munmap(addr, FILE_SIZE) == -1)
+    {
+        perror("munmap");
+        exit(1);
+    }
+    close(fd);
+    close(new_fd);
 }
 
 void mmap_client(const char *filename)
 {
-    struct sockaddr_un servaddr;
-    int sock_uds_dgram = socket(AF_UNIX, SOCK_DGRAM, 0);
-    if (sock_uds_dgram < 0)
-    {
-        perror("socket");
-        exit(1);
-    }
-    struct sockaddr_un serv_addr;
-    memset(&serv_addr, 0, sizeof(serv_addr));
-    serv_addr.sun_family = AF_UNIX;
-    strncpy(serv_addr.sun_path, UDS_D_PATH, sizeof(serv_addr.sun_path) - 1);
+    printf("filename = %s\n", filename);
+    fflush(stdout);
 
-    printf("Connected to server in uds_dgram\n");
-
-    int fd = open(filename, O_RDONLY);
+    int fd = open("mmap", O_RDWR, S_IRUSR | S_IWUSR); // open file with read permissions
     if (fd == -1)
     {
-        perror("Error opening the file");
-        exit(EXIT_FAILURE);
+        perror("open");
+        exit(1);
     }
 
-    char *mapped_file = mmap(NULL, FILE_SIZE, PROT_READ, MAP_PRIVATE, fd, 0);
-    if (mapped_file == MAP_FAILED)
+    // Map the file into memory
+    char *addr = mmap(NULL, FILE_SIZE, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+    if (addr == MAP_FAILED)
     {
-        close(fd);
-        perror("Error mmapping the file");
-        exit(EXIT_FAILURE);
+        perror("mmap");
+        exit(1);
     }
 
-    char *ptr = mapped_file;
-    size_t remaining_bytes = FILE_SIZE;
-    int i = 1;
-    sleep(2);
-
-    while (remaining_bytes > 0)
+    // Read the data from the file into the mapped memory
+    char buffer[CHUNK_SIZE];
+    FILE *f = fopen(filename, "rb");
+    if (f == NULL)
     {
-        size_t bytes_to_send = (remaining_bytes < CHUNK_SIZE) ? remaining_bytes : CHUNK_SIZE;
-        if (sendto(sock_uds_dgram, ptr, bytes_to_send, 0, (const struct sockaddr *)&serv_addr, sizeof(serv_addr)) < 0)
-        {
-            perror("sendto");
-            exit(1);
-        }
-        ptr += bytes_to_send;
-        remaining_bytes -= bytes_to_send;
-        i++;
+        perror("open");
+        exit(1);
     }
 
-    munmap(mapped_file, FILE_SIZE);
+    while (fread(buffer, 1, CHUNK_SIZE, f) > 0)
+    {
+        memcpy(addr, buffer, CHUNK_SIZE);
+    }
+
+    // Signal the server that the data has been written to the mapped memory
+    strcpy((char *)addr, "ACK");
+
+    // Unmap the memory and close the file
+    if (munmap(addr, FILE_SIZE) == -1)
+    {
+        perror("munmap");
+        exit(1);
+    }
     close(fd);
-    close(sock_uds_dgram);
-
-    char * file_name = *filename;
-    checksum(file_name);
-    printf("Sent file '%s'\n", filename);
 }
 
 void run_client(char *ip, int port, int flag, const char *type, const char *param)
